@@ -15,9 +15,18 @@ type alias Model =
 
 type alias ID = Int
 
+minutesPerHalf = 20
+
 init : Model
 init =
-  { players = []
+  { players = [
+      (1, "Damon"),
+      (2, "Mason"),
+      (3, "Clara"),
+      (4, "Lincoln"),
+      (5, "Preston"),
+      (6, "Haleigh")
+    ]
   , nextID = 0
   }
 
@@ -63,3 +72,16 @@ viewPlayer address (id, model) =
           (Signal.forwardTo address (always (Remove id)))
   in
       li [] [ Player.viewWithRemove context model ]
+
+minuteHeaderRow =
+  [th [] [text ""]] ++ (List.reverse [1..20] |> List.map (\n -> th [] [text (toString n)]))
+
+playerRow player =
+  tr [] ( [ th [] [text player] ] ++ List.map (\n -> td [] [text ""]) [1..20] )
+
+viewTable : Signal.Address Action -> Model -> Html
+viewTable address model =
+  let rows = [ tr [] minuteHeaderRow ] ++ List.map (\(id,player) -> playerRow player) model.players
+  in
+      table [] rows
+
