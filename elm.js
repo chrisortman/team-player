@@ -11956,12 +11956,16 @@ Elm.PlayerList.make = function (_elm) {
    $moduleName = "PlayerList",
    $Basics = Elm.Basics.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Player = Elm.Player.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
+   var tableStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "border"
+                                                         ,_1: "1px solid black"}]));
    var playerRow = function (player) {
       return A2($Html.tr,
       _L.fromArray([]),
@@ -12006,7 +12010,9 @@ Elm.PlayerList.make = function (_elm) {
          },
          model.players));
          return A2($Html.table,
-         _L.fromArray([]),
+         _L.fromArray([A2($Html$Attributes.attribute,
+         "border",
+         "1")]),
          rows);
       }();
    });
@@ -12139,7 +12145,8 @@ Elm.PlayerList.make = function (_elm) {
                             ,viewPlayer: viewPlayer
                             ,minuteHeaderRow: minuteHeaderRow
                             ,playerRow: playerRow
-                            ,viewTable: viewTable};
+                            ,viewTable: viewTable
+                            ,tableStyle: tableStyle};
    return _elm.PlayerList.values;
 };
 Elm.Result = Elm.Result || {};

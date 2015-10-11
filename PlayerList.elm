@@ -2,7 +2,7 @@ module PlayerList where
 
 import Player
 import Html exposing (..)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, attribute)
 import Html.Events exposing (onClick)
 
 -- MODEL
@@ -83,5 +83,10 @@ viewTable : Signal.Address Action -> Model -> Html
 viewTable address model =
   let rows = [ tr [] minuteHeaderRow ] ++ List.map (\(id,player) -> playerRow player) model.players
   in
-      table [] rows
+      table [attribute "border" "1"] rows
 
+tableStyle : Attribute
+tableStyle =
+  style
+    [ ("border","1px solid black") ]
+      
