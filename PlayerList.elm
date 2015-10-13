@@ -77,13 +77,27 @@ minuteHeaderRow =
   [th [] [text ""]] ++ (List.reverse [1..20] |> List.map (\n -> th [] [text (toString n)]))
 
 playerRow player =
-  tr [] ( [ th [] [text player] ] ++ List.map (\n -> td [] [text ""]) [1..20] )
+  tr [] ( [ th [] [text player] ] ++ List.map (\n -> td [(cellStyle 1)] [text ""]) [1..20] )
 
 viewTable : Signal.Address Action -> Model -> Html
 viewTable address model =
   let rows = [ tr [] minuteHeaderRow ] ++ List.map (\(id,player) -> playerRow player) model.players
   in
       table [attribute "border" "1"] rows
+
+playingStyle : Attribute
+playingStyle =
+  style
+    [ ("background-color","green") ]
+
+notPlayingStyle : Attribute
+notPlayingStyle =
+  style
+    [ ("background-color","white") ]
+
+cellStyle : number -> Attribute
+cellStyle isPlaying =
+  if isPlaying == 1 then playingStyle else notPlayingStyle
 
 tableStyle : Attribute
 tableStyle =

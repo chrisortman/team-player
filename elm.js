@@ -11966,6 +11966,16 @@ Elm.PlayerList.make = function (_elm) {
    var tableStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
                                                          ,_0: "border"
                                                          ,_1: "1px solid black"}]));
+   var notPlayingStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                              ,_0: "background-color"
+                                                              ,_1: "white"}]));
+   var playingStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                           ,_0: "background-color"
+                                                           ,_1: "green"}]));
+   var cellStyle = function (isPlaying) {
+      return _U.eq(isPlaying,
+      1) ? playingStyle : notPlayingStyle;
+   };
    var playerRow = function (player) {
       return A2($Html.tr,
       _L.fromArray([]),
@@ -11976,7 +11986,7 @@ Elm.PlayerList.make = function (_elm) {
       A2($List.map,
       function (n) {
          return A2($Html.td,
-         _L.fromArray([]),
+         _L.fromArray([cellStyle(1)]),
          _L.fromArray([$Html.text("")]));
       },
       _L.range(1,20))));
@@ -12146,6 +12156,9 @@ Elm.PlayerList.make = function (_elm) {
                             ,minuteHeaderRow: minuteHeaderRow
                             ,playerRow: playerRow
                             ,viewTable: viewTable
+                            ,playingStyle: playingStyle
+                            ,notPlayingStyle: notPlayingStyle
+                            ,cellStyle: cellStyle
                             ,tableStyle: tableStyle};
    return _elm.PlayerList.values;
 };
