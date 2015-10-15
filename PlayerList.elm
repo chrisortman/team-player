@@ -20,12 +20,12 @@ minutesPerHalf = 20
 init : Model
 init =
   { players = [
-      (1, "Damon"),
-      (2, "Mason"),
-      (3, "Clara"),
-      (4, "Lincoln"),
-      (5, "Preston"),
-      (6, "Haleigh")
+      (1, Player.init "Damon"),
+      (2, Player.init "Mason"),
+      (3, Player.init "Clara"),
+      (4, Player.init "Lincoln"),
+      (5, Player.init "Preston"),
+      (6, Player.init "Haleigh")
     ]
   , nextID = 0
   }
@@ -35,7 +35,7 @@ init =
 type Action
   = Add
   | Remove ID
-  | None ID Player.Action
+  | Sub ID Player.Action
 
 update : Action -> Model -> Model
 update action model =
@@ -54,8 +54,13 @@ update action model =
       { model | 
           players <- List.filter (\(playerID, _) -> playerID /= id) model.players
       }
-    None id playerAction ->
-      model
+    Sub id playerAction ->
+      let subPlayer (playerID, playerModel) = 
+          if playerID == id
+             then (playerID, Player.update playerAction playerModel)
+             else (playerID, playerModel)
+      in
+         { model | players <- List.map subPlayer model.players }
 
 view : Signal.Address Action -> Model -> Html
 view address model = 
@@ -68,7 +73,7 @@ viewPlayer : Signal.Address Action -> (ID, Player.Model) -> Html
 viewPlayer address (id, model) =
   let context =
         Player.Context
-          (Signal.forwardTo address (None id))
+          (Signal.forwardTo address (Sub id))
           (Signal.forwardTo address (always (Remove id)))
   in
       li [] [ Player.viewWithRemove context model ]
@@ -76,31 +81,18 @@ viewPlayer address (id, model) =
 minuteHeaderRow =
   [th [] [text ""]] ++ (List.reverse [1..20] |> List.map (\n -> th [] [text (toString n)]))
 
-playerRow player =
-  tr [] ( [ th [] [text player] ] ++ List.map (\n -> td [(cellStyle 1)] [text ""]) [1..20] )
 
 viewTable : Signal.Address Action -> Model -> Html
 viewTable address model =
-  let rows = [ tr [] minuteHeaderRow ] ++ List.map (\(id,player) -> playerRow player) model.players
+  let headerRow = [ tr [] minuteHeaderRow ]
+      buildPlayerRow (id,player) = 
+        Player.rowView (Signal.forwardTo address (Sub id)) player
+      rows = headerRow ++ List.map buildPlayerRow model.players
   in
       table [attribute "border" "1"] rows
-
-playingStyle : Attribute
-playingStyle =
-  style
-    [ ("background-color","green") ]
-
-notPlayingStyle : Attribute
-notPlayingStyle =
-  style
-    [ ("background-color","white") ]
-
-cellStyle : number -> Attribute
-cellStyle isPlaying =
-  if isPlaying == 1 then playingStyle else notPlayingStyle
 
 tableStyle : Attribute
 tableStyle =
   style
     [ ("border","1px solid black") ]
-      
+
