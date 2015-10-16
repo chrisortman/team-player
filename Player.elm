@@ -1,9 +1,9 @@
-module Player (Model, init, Action, Context, update, view, viewWithRemove, rowView) where
+module Player (Model, init, Action, Context, update, view, viewWithRemove, rowView, playing) where
 
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
-
+import Array exposing (..)
 -- MODEL
 type alias Model = (String, List Bool)
 init : String -> Model
@@ -82,3 +82,8 @@ cellStyle : Bool -> Attribute
 cellStyle isPlaying =
   if isPlaying then playingStyle else notPlayingStyle
 
+playing : Model -> Int -> Bool
+playing (_, minutes) m =
+  case Array.get m (Array.fromList minutes) of
+    Nothing -> False
+    Just b -> b
