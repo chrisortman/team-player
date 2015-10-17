@@ -5,9 +5,12 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Array exposing (..)
 -- MODEL
-type alias Model = (String, List Bool)
+type alias Model =
+    { name : String
+    , playingMinutes : List Int
+    }
 init : String -> Model
-init name = (name, List.repeat 20 False)
+init playerName = { name = playerName, playingMinutes = []}
 
 -- UPDATE
 
@@ -16,33 +19,19 @@ type Action
   | SubIn Int
   | SubOut Int
 
-inverse x =
-  if x then False else True
-
-togglePlay : Int -> Int -> Bool -> Bool
-togglePlay gameMinute playerMinute current =
-  if gameMinute == playerMinute
-     then inverse current
-     else current
 
 update : Action -> Model -> Model
-update action (name,minutes) =
+update action model =
   case action of
-    None -> (name, minutes)
-    SubIn gameMinute -> 
-      let toggle playerMinute playing =
-            togglePlay gameMinute (playerMinute) playing
-          newMinutes = List.indexedMap toggle minutes
-      in
-         (name, newMinutes)
+    None -> model
+    SubIn gameMinute ->
+       { model | playingMinutes <- gameMinute :: model.playingMinutes }
     SubOut m ->
-      let toggle = togglePlay m
-      in
-         (name, minutes)
+       { model | playingMinutes <- model.playingMinutes }
 
 view : Signal.Address Action -> Model -> Html
-view address (name,minutes) =
-  div [] [ text name ]
+view address model =
+  div [] [ text model.name ]
 
 
 type alias Context =
@@ -51,39 +40,32 @@ type alias Context =
   }
 
 viewWithRemove : Context -> Model -> Html
-viewWithRemove context (name,minutes) =
+viewWithRemove context model =
   div []
-    [ text name
+    [ text model.name
     , button [ onClick context.remove () ] [ text "X" ]
     ]
 
-rowView : Signal.Address Action -> Model -> Html
-rowView address (player,minutes) =
-  let cellAttrs isPlaying mm =
-    [cellStyle isPlaying, onClick address (nextAction isPlaying mm)]
+rowView : Signal.Address Action -> List Int -> Model -> Html
+rowView address gameMinutes model =
+  let isPlaying minute = List.member minute model.playingMinutes
+      cellAttrs minute =
+        [cellStyle (isPlaying minute), onClick address (if (isPlaying minute) then SubOut minute else SubIn minute)]
+
   in
-    tr [] ( [ th [] [text player] ] ++ List.indexedMap (\x n -> td (cellAttrs n x) [text ""]) minutes )
-
-playingStyle : Attribute
-playingStyle =
-  style
-    [ ("background-color","green") ]
-
-notPlayingStyle : Attribute
-notPlayingStyle =
-  style
-    [ ("background-color","white") ]
-
-nextAction : Bool -> Int -> Action
-nextAction isPlaying =
-  if isPlaying then SubOut else SubIn
+    tr [] ( [ th [] [text model.name] ] ++ List.map (\n -> td (cellAttrs n) [text ""]) gameMinutes)
 
 cellStyle : Bool -> Attribute
 cellStyle isPlaying =
-  if isPlaying then playingStyle else notPlayingStyle
+  let playingStyle =
+        style
+          [ ("background-color","green") ]
+      notPlayingStyle =
+        style
+          [ ("background-color","white") ]
+  in
+    if isPlaying then playingStyle else notPlayingStyle
 
 playing : Model -> Int -> Bool
-playing (_, minutes) m =
-  case Array.get m (Array.fromList minutes) of
-    Nothing -> False
-    Just b -> b
+playing model m =
+  List.member m model.playingMinutes

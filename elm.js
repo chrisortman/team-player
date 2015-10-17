@@ -11892,7 +11892,6 @@ Elm.Player.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Player",
-   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
@@ -11901,50 +11900,33 @@ Elm.Player.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var playing = F2(function (_v0,
+   var playing = F2(function (model,
    m) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var _v4 = A2($Array.get,
-                 m,
-                 $Array.fromList(_v0._1));
-                 switch (_v4.ctor)
-                 {case "Just": return _v4._0;
-                    case "Nothing": return false;}
-                 _U.badCase($moduleName,
-                 "between lines 87 and 89");
-              }();}
-         _U.badCase($moduleName,
-         "between lines 87 and 89");
-      }();
+      return A2($List.member,
+      m,
+      model.playingMinutes);
    });
-   var notPlayingStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                              ,_0: "background-color"
-                                                              ,_1: "white"}]));
-   var playingStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                           ,_0: "background-color"
-                                                           ,_1: "green"}]));
    var cellStyle = function (isPlaying) {
-      return isPlaying ? playingStyle : notPlayingStyle;
+      return function () {
+         var notPlayingStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                                    ,_0: "background-color"
+                                                                    ,_1: "white"}]));
+         var playingStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                                 ,_0: "background-color"
+                                                                 ,_1: "green"}]));
+         return isPlaying ? playingStyle : notPlayingStyle;
+      }();
    };
    var viewWithRemove = F2(function (context,
-   _v6) {
-      return function () {
-         switch (_v6.ctor)
-         {case "_Tuple2":
-            return A2($Html.div,
-              _L.fromArray([]),
-              _L.fromArray([$Html.text(_v6._0)
-                           ,A2($Html.button,
-                           _L.fromArray([A2($Html$Events.onClick,
-                           context.remove,
-                           {ctor: "_Tuple0"})]),
-                           _L.fromArray([$Html.text("X")]))]));}
-         _U.badCase($moduleName,
-         "between lines 55 and 58");
-      }();
+   model) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([$Html.text(model.name)
+                   ,A2($Html.button,
+                   _L.fromArray([A2($Html$Events.onClick,
+                   context.remove,
+                   {ctor: "_Tuple0"})]),
+                   _L.fromArray([$Html.text("X")]))]));
    });
    var Context = F2(function (a,
    b) {
@@ -11953,65 +11935,28 @@ Elm.Player.make = function (_elm) {
              ,remove: b};
    });
    var view = F2(function (address,
-   _v10) {
-      return function () {
-         switch (_v10.ctor)
-         {case "_Tuple2":
-            return A2($Html.div,
-              _L.fromArray([]),
-              _L.fromArray([$Html.text(_v10._0)]));}
-         _U.badCase($moduleName,
-         "on line 45, column 3 to 23");
-      }();
-   });
-   var inverse = function (x) {
-      return x ? false : true;
-   };
-   var togglePlay = F3(function (gameMinute,
-   playerMinute,
-   current) {
-      return _U.eq(gameMinute,
-      playerMinute) ? inverse(current) : current;
+   model) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([$Html.text(model.name)]));
    });
    var update = F2(function (action,
-   _v14) {
+   model) {
       return function () {
-         switch (_v14.ctor)
-         {case "_Tuple2":
-            return function () {
-                 switch (action.ctor)
-                 {case "None":
-                    return {ctor: "_Tuple2"
-                           ,_0: _v14._0
-                           ,_1: _v14._1};
-                    case "SubIn":
-                    return function () {
-                         var toggle = F2(function (playerMinute,
-                         playing) {
-                            return A3(togglePlay,
-                            action._0,
-                            playerMinute,
-                            playing);
-                         });
-                         var newMinutes = A2($List.indexedMap,
-                         toggle,
-                         _v14._1);
-                         return {ctor: "_Tuple2"
-                                ,_0: _v14._0
-                                ,_1: newMinutes};
-                      }();
-                    case "SubOut":
-                    return function () {
-                         var toggle = togglePlay(action._0);
-                         return {ctor: "_Tuple2"
-                                ,_0: _v14._0
-                                ,_1: _v14._1};
-                      }();}
-                 _U.badCase($moduleName,
-                 "between lines 30 and 41");
-              }();}
+         switch (action.ctor)
+         {case "None": return model;
+            case "SubIn":
+            return _U.replace([["playingMinutes"
+                               ,A2($List._op["::"],
+                               action._0,
+                               model.playingMinutes)]],
+              model);
+            case "SubOut":
+            return _U.replace([["playingMinutes"
+                               ,model.playingMinutes]],
+              model);}
          _U.badCase($moduleName,
-         "between lines 30 and 41");
+         "between lines 25 and 30");
       }();
    });
    var SubOut = function (a) {
@@ -12021,46 +11966,47 @@ Elm.Player.make = function (_elm) {
    var SubIn = function (a) {
       return {ctor: "SubIn",_0: a};
    };
-   var nextAction = function (isPlaying) {
-      return isPlaying ? SubOut : SubIn;
-   };
-   var rowView = F2(function (address,
-   _v21) {
+   var rowView = F3(function (address,
+   gameMinutes,
+   model) {
       return function () {
-         switch (_v21.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var cellAttrs = F2(function (isPlaying,
-                 mm) {
-                    return _L.fromArray([cellStyle(isPlaying)
-                                        ,A2($Html$Events.onClick,
-                                        address,
-                                        A2(nextAction,isPlaying,mm))]);
-                 });
-                 return A2($Html.tr,
-                 _L.fromArray([]),
-                 A2($Basics._op["++"],
-                 _L.fromArray([A2($Html.th,
-                 _L.fromArray([]),
-                 _L.fromArray([$Html.text(_v21._0)]))]),
-                 A2($List.indexedMap,
-                 F2(function (x,n) {
-                    return A2($Html.td,
-                    A2(cellAttrs,n,x),
-                    _L.fromArray([$Html.text("")]));
-                 }),
-                 _v21._1)));
-              }();}
-         _U.badCase($moduleName,
-         "between lines 62 and 65");
+         var isPlaying = function (minute) {
+            return A2($List.member,
+            minute,
+            model.playingMinutes);
+         };
+         var cellAttrs = function (minute) {
+            return _L.fromArray([cellStyle(isPlaying(minute))
+                                ,A2($Html$Events.onClick,
+                                address,
+                                isPlaying(minute) ? SubOut(minute) : SubIn(minute))]);
+         };
+         return A2($Html.tr,
+         _L.fromArray([]),
+         A2($Basics._op["++"],
+         _L.fromArray([A2($Html.th,
+         _L.fromArray([]),
+         _L.fromArray([$Html.text(model.name)]))]),
+         A2($List.map,
+         function (n) {
+            return A2($Html.td,
+            cellAttrs(n),
+            _L.fromArray([$Html.text("")]));
+         },
+         gameMinutes)));
       }();
    });
    var None = {ctor: "None"};
-   var init = function (name) {
-      return {ctor: "_Tuple2"
-             ,_0: name
-             ,_1: A2($List.repeat,20,false)};
+   var init = function (playerName) {
+      return {_: {}
+             ,name: playerName
+             ,playingMinutes: _L.fromArray([])};
    };
+   var Model = F2(function (a,b) {
+      return {_: {}
+             ,name: a
+             ,playingMinutes: b};
+   });
    _elm.Player.values = {_op: _op
                         ,init: init
                         ,update: update
@@ -12068,6 +12014,7 @@ Elm.Player.make = function (_elm) {
                         ,viewWithRemove: viewWithRemove
                         ,rowView: rowView
                         ,playing: playing
+                        ,Model: Model
                         ,Context: Context};
    return _elm.Player.values;
 };
@@ -12092,14 +12039,6 @@ Elm.PlayerList.make = function (_elm) {
    $Player = Elm.Player.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var tableStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "border"
-                                                         ,_1: "1px solid black"}]));
-   var valueCell = function (x) {
-      return A2($Html.td,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text($Basics.toString(x))]));
-   };
    var playingCount = F2(function (model,
    minute) {
       return function () {
@@ -12114,22 +12053,12 @@ Elm.PlayerList.make = function (_elm) {
                switch (_v0.ctor)
                {case "_Tuple2": return _v0._1;}
                _U.badCase($moduleName,
-               "on line 90, column 26 to 27");
+               "on line 91, column 26 to 27");
             }();
          },
          model.players))));
       }();
    });
-   var minuteHeaderRow = A2($Basics._op["++"],
-   _L.fromArray([A2($Html.th,
-   _L.fromArray([]),
-   _L.fromArray([$Html.text("")]))]),
-   $List.map(function (n) {
-      return A2($Html.th,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text($Basics.toString(n))]));
-   })($List.reverse(_L.range(1,
-   20))));
    var update = F2(function (action,
    model) {
       return function () {
@@ -12160,7 +12089,7 @@ Elm.PlayerList.make = function (_elm) {
                                         return !_U.eq(_v8._0,
                                           action._0);}
                                      _U.badCase($moduleName,
-                                     "on line 55, column 53 to 67");
+                                     "on line 58, column 53 to 67");
                                   }();
                                },
                                model.players)]],
@@ -12179,7 +12108,7 @@ Elm.PlayerList.make = function (_elm) {
                                                      ,_0: _v12._0
                                                      ,_1: _v12._1};}
                        _U.badCase($moduleName,
-                       "between lines 59 and 61");
+                       "between lines 62 and 64");
                     }();
                  };
                  return _U.replace([["players"
@@ -12189,7 +12118,7 @@ Elm.PlayerList.make = function (_elm) {
                  model);
               }();}
          _U.badCase($moduleName,
-         "between lines 42 and 63");
+         "between lines 45 and 66");
       }();
    });
    var Sub = F2(function (a,b) {
@@ -12200,39 +12129,52 @@ Elm.PlayerList.make = function (_elm) {
    var viewTable = F2(function (address,
    model) {
       return function () {
-         var prependEmptyCell = function (x) {
+         var playerRow = function (_v16) {
+            return function () {
+               switch (_v16.ctor)
+               {case "_Tuple2":
+                  return A3($Player.rowView,
+                    A2($Signal.forwardTo,
+                    address,
+                    Sub(_v16._0)),
+                    model.minutes,
+                    _v16._1);}
+               _U.badCase($moduleName,
+               "on line 105, column 9 to 80");
+            }();
+         };
+         var playerRows = A2($List.map,
+         playerRow,
+         model.players);
+         var prependEmptyCell = function (rows) {
             return A2($List._op["::"],
             A2($Html.td,
             _L.fromArray([]),
             _L.fromArray([])),
-            x);
+            rows);
          };
-         var footerRow = _L.fromArray([A2($Html.tr,
-         _L.fromArray([]),
-         prependEmptyCell($List.map(valueCell)($List.map(playingCount(model))(_L.range(0,
-         20)))))]);
-         var buildPlayerRow = function (_v16) {
-            return function () {
-               switch (_v16.ctor)
-               {case "_Tuple2":
-                  return A2($Player.rowView,
-                    A2($Signal.forwardTo,
-                    address,
-                    Sub(_v16._0)),
-                    _v16._1);}
-               _U.badCase($moduleName,
-               "on line 103, column 9 to 66");
-            }();
+         var headerCell = function (value) {
+            return A2($Html.th,
+            _L.fromArray([]),
+            _L.fromArray([$Html.text($Basics.toString(value))]));
          };
          var headerRow = _L.fromArray([A2($Html.tr,
          _L.fromArray([]),
-         minuteHeaderRow)]);
+         A2($Basics._op["++"],
+         _L.fromArray([headerCell("")]),
+         $List.map(headerCell)($List.reverse(model.minutes))))]);
+         var valueCell = function (value) {
+            return A2($Html.td,
+            _L.fromArray([]),
+            _L.fromArray([$Html.text($Basics.toString(value))]));
+         };
+         var footerRow = _L.fromArray([A2($Html.tr,
+         _L.fromArray([]),
+         prependEmptyCell($List.map(valueCell)($List.map(playingCount(model))(model.minutes))))]);
          var rows = A2($Basics._op["++"],
          headerRow,
          A2($Basics._op["++"],
-         A2($List.map,
-         buildPlayerRow,
-         model.players),
+         playerRows,
          footerRow));
          return A2($Html.table,
          _L.fromArray([A2($Html$Attributes.attribute,
@@ -12265,7 +12207,7 @@ Elm.PlayerList.make = function (_elm) {
                  _v20._1)]));
               }();}
          _U.badCase($moduleName,
-         "between lines 74 and 79");
+         "between lines 77 and 82");
       }();
    });
    var Add = {ctor: "Add"};
@@ -12287,7 +12229,10 @@ Elm.PlayerList.make = function (_elm) {
          _L.fromArray([add])));
       }();
    });
+   var minutesPerHalf = 20;
    var init = {_: {}
+              ,minutes: _L.range(1,
+              minutesPerHalf)
               ,nextID: 0
               ,players: _L.fromArray([{ctor: "_Tuple2"
                                       ,_0: 1
@@ -12307,10 +12252,11 @@ Elm.PlayerList.make = function (_elm) {
                                      ,{ctor: "_Tuple2"
                                       ,_0: 6
                                       ,_1: $Player.init("Haleigh")}])};
-   var minutesPerHalf = 20;
-   var PlayerListModel = F2(function (a,
-   b) {
+   var PlayerListModel = F3(function (a,
+   b,
+   c) {
       return {_: {}
+             ,minutes: c
              ,nextID: b
              ,players: a};
    });
@@ -12324,11 +12270,8 @@ Elm.PlayerList.make = function (_elm) {
                             ,update: update
                             ,view: view
                             ,viewPlayer: viewPlayer
-                            ,minuteHeaderRow: minuteHeaderRow
                             ,playingCount: playingCount
-                            ,valueCell: valueCell
-                            ,viewTable: viewTable
-                            ,tableStyle: tableStyle};
+                            ,viewTable: viewTable};
    return _elm.PlayerList.values;
 };
 Elm.Result = Elm.Result || {};

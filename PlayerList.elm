@@ -10,12 +10,14 @@ import Array exposing (..)
 type alias PlayerListModel =
   { players : List ( ID, Player.Model )
   , nextID : ID
+  , minutes : List Int
   }
 
 
 type alias ID = Int
 
 minutesPerHalf = 20
+
 
 init : PlayerListModel
 init =
@@ -28,6 +30,7 @@ init =
       (6, Player.init "Haleigh")
     ]
   , nextID = 0
+  , minutes = [1..minutesPerHalf]
   }
 
 -- UPDATE
@@ -78,8 +81,6 @@ viewPlayer address (id, model) =
   in
       li [] [ Player.viewWithRemove context model ]
 
-minuteHeaderRow =
-  [th [] [text ""]] ++ (List.reverse [1..20] |> List.map (\n -> th [] [text (toString n)]))
 
 
 playingCount : PlayerListModel -> Int -> Int
@@ -92,29 +93,25 @@ playingCount model minute =
     |> Array.fromList
     |> Array.length
 
-valueCell : Int -> Html
-valueCell x =
-  td [] [text (toString x)]
 
 viewTable : Signal.Address Action -> PlayerListModel -> Html
 viewTable address model =
-  let headerRow = [ tr [] minuteHeaderRow ]
-      buildPlayerRow (id,player) =
-        Player.rowView (Signal.forwardTo address (Sub id)) player
-      prependEmptyCell x = (td [] []) :: x
+  let valueCell value = td [] [text (toString value)]
+      headerCell value = th [] [text (toString value)]
+      prependEmptyCell rows = (td [] []) :: rows
+      headerRow =
+        [tr [] ([headerCell ""] ++ (List.reverse model.minutes |> List.map headerCell)) ]
+      playerRow (id,player) =
+        Player.rowView (Signal.forwardTo address (Sub id)) model.minutes player
+      playerRows = List.map playerRow model.players
       footerRow =
-        [ tr [] ([0..20]
+        [ tr [] (model.minutes
                  |> List.map (playingCount model)
                  |> List.map valueCell
                  |> prependEmptyCell) ]
       rows =
-        headerRow ++ List.map buildPlayerRow model.players ++ footerRow
+        headerRow ++ playerRows ++ footerRow
 
   in
       table [attribute "border" "1"] rows
-
-tableStyle : Attribute
-tableStyle =
-  style
-    [ ("border","1px solid black") ]
 
