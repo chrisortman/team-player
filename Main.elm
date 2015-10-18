@@ -1,9 +1,9 @@
-import PlayerList exposing (init, update, viewTable)
+import PlayerList exposing (init, update, view)
 import StartApp.Simple exposing (start)
 
 main =
   start
     { model = init
     , update = update
-    , view = viewTable
+    , view = view
     }

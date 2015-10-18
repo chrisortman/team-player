@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (style, attribute)
 import Html.Events exposing (onClick)
 import Array exposing (..)
+import String exposing (append, join)
 -- MODEL
 
 type alias PlayerListModel =
@@ -70,7 +71,12 @@ view address model =
   let players = List.map (viewPlayer address) model.players
       add    = button [ onClick address Add ] [ text "Add" ]
   in
-      ul [] (players ++ [add])
+      div []
+        [
+          ul [] (players ++ [add])
+        , viewTable address model
+        , viewSublist address model
+        ]
 
 viewPlayer : Signal.Address Action -> (ID, Player.Model) -> Html
 viewPlayer address (id, model) =
@@ -93,6 +99,7 @@ playingCount model minute =
     |> Array.fromList
     |> Array.length
 
+reverseMap f l = (List.reverse << List.map f) l
 
 viewTable : Signal.Address Action -> PlayerListModel -> Html
 viewTable address model =
@@ -100,12 +107,16 @@ viewTable address model =
       headerCell value = th [] [text (toString value)]
       prependEmptyCell rows = (td [] []) :: rows
       headerRow =
-        [tr [] ([headerCell ""] ++ (List.reverse model.minutes |> List.map headerCell)) ]
+        [tr []
+            ([headerCell "Player"] ++ (reverseMap headerCell model.minutes) ++ [(headerCell "Minutes")])
+        ]
       playerRow (id,player) =
-        Player.rowView (Signal.forwardTo address (Sub id)) model.minutes player
+        Player.rowView (Signal.forwardTo address (Sub id)) (List.reverse model.minutes) player
       playerRows = List.map playerRow model.players
+
       footerRow =
         [ tr [] (model.minutes
+                 |> List.reverse
                  |> List.map (playingCount model)
                  |> List.map valueCell
                  |> prependEmptyCell) ]
@@ -115,3 +126,20 @@ viewTable address model =
   in
       table [attribute "border" "1"] rows
 
+viewSublist address model = 
+  let subsIn m =
+        model.players
+        |> List.filter (\(_,p) -> Player.subIn p m)
+        |> List.map (\(_,p) -> Player.name p)
+        |> String.join ","
+      subsOut m =
+        model.players
+        |> List.filter (\(_,p) -> Player.subOut p m)
+        |> List.map (\(_,p) -> Player.name p)
+        |> String.join ","
+      subsForMinute m =
+        String.concat [(toString m), ":00 - ", "Sub In ", (subsIn m), " -- Sub Out", (subsOut m) ]
+      substitutions = reverseMap subsForMinute model.minutes
+  in
+    ul []
+       (substitutions |> List.map (\n -> li [] [text n]))

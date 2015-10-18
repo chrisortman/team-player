@@ -1,9 +1,10 @@
-module Player (Model, init, Action, Context, update, view, viewWithRemove, rowView, playing) where
+module Player (Model, init, Action, Context, update, view, viewWithRemove, rowView, playing, name, subIn, subOut) where
 
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Array exposing (..)
+import Debug exposing(..)
 -- MODEL
 type alias Model =
     { name : String
@@ -25,9 +26,10 @@ update action model =
   case action of
     None -> model
     SubIn gameMinute ->
-       { model | playingMinutes <- gameMinute :: model.playingMinutes }
+       { model | playingMinutes <- (log "gameMinutes" (gameMinute :: model.playingMinutes)) }
     SubOut m ->
-       { model | playingMinutes <- model.playingMinutes }
+       { model 
+         | playingMinutes <- (List.filter (\n -> n /= m) model.playingMinutes) }
 
 view : Signal.Address Action -> Model -> Html
 view address model =
@@ -49,11 +51,17 @@ viewWithRemove context model =
 rowView : Signal.Address Action -> List Int -> Model -> Html
 rowView address gameMinutes model =
   let isPlaying minute = List.member minute model.playingMinutes
-      cellAttrs minute =
-        [cellStyle (isPlaying minute), onClick address (if (isPlaying minute) then SubOut minute else SubIn minute)]
+      cell minute =
+        td [ cellStyle (isPlaying minute)
+           , onClick address (if (isPlaying minute) then SubOut minute else SubIn minute)
+           ]
+           [text ""]
+      totalMinutes = Array.fromList model.playingMinutes |> Array.length
 
   in
-    tr [] ( [ th [] [text model.name] ] ++ List.map (\n -> td (cellAttrs n) [text ""]) gameMinutes)
+    tr 
+      [] 
+      ( [ th [] [text model.name] ] ++ List.map cell gameMinutes ++ [td [] [text (toString totalMinutes)]])
 
 cellStyle : Bool -> Attribute
 cellStyle isPlaying =
@@ -69,3 +77,18 @@ cellStyle isPlaying =
 playing : Model -> Int -> Bool
 playing model m =
   List.member m model.playingMinutes
+
+name : Model -> String
+name model = model.name
+
+subIn : Model -> Int -> Bool
+subIn model m =
+  case m of
+    20 -> playing model m
+    _  -> if not (playing model (m + 1)) then (playing model m) else False
+
+subOut : Model -> Int -> Bool
+subOut model m =
+  case m of
+    20 -> False
+    _  -> if (playing model (m + 1)) then not (playing model m) else False
