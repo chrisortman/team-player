@@ -12090,59 +12090,88 @@ Elm.PlayerList.make = function (_elm) {
    var viewSublist = F2(function (address,
    model) {
       return function () {
-         var subsOut = function (m) {
-            return $String.join(",")($List.map(function (_v4) {
-               return function () {
-                  switch (_v4.ctor)
-                  {case "_Tuple2":
-                     return $Player.name(_v4._1);}
-                  _U.badCase($moduleName,
-                  "on line 138, column 32 to 45");
-               }();
-            })($List.filter(function (_v0) {
+         var nonBlankString = function (s) {
+            return $Basics.not($String.isEmpty(s));
+         };
+         var formatSubs = function (pairs) {
+            return $String.join(", ")($List.map(function (_v0) {
                return function () {
                   switch (_v0.ctor)
                   {case "_Tuple2":
-                     return A2($Player.subOut,
-                       _v0._1,
-                       m);}
+                     return A2($Basics._op["++"],
+                       _v0._0,
+                       A2($Basics._op["++"],
+                       " for ",
+                       _v0._1));}
                   _U.badCase($moduleName,
-                  "on line 137, column 35 to 52");
+                  "on line 142, column 32 to 49");
                }();
-            })(model.players)));
+            })(pairs));
          };
-         var subsIn = function (m) {
-            return $String.join(",")($List.map(function (_v12) {
-               return function () {
-                  switch (_v12.ctor)
-                  {case "_Tuple2":
-                     return $Player.name(_v12._1);}
-                  _U.badCase($moduleName,
-                  "on line 133, column 32 to 45");
-               }();
-            })($List.filter(function (_v8) {
+         var subsOut = function (m) {
+            return $List.map(function (_v8) {
                return function () {
                   switch (_v8.ctor)
                   {case "_Tuple2":
+                     return $Player.name(_v8._1);}
+                  _U.badCase($moduleName,
+                  "on line 137, column 32 to 45");
+               }();
+            })($List.filter(function (_v4) {
+               return function () {
+                  switch (_v4.ctor)
+                  {case "_Tuple2":
+                     return A2($Player.subOut,
+                       _v4._1,
+                       m);}
+                  _U.badCase($moduleName,
+                  "on line 136, column 35 to 52");
+               }();
+            })(model.players));
+         };
+         var subsIn = function (m) {
+            return $List.map(function (_v16) {
+               return function () {
+                  switch (_v16.ctor)
+                  {case "_Tuple2":
+                     return $Player.name(_v16._1);}
+                  _U.badCase($moduleName,
+                  "on line 133, column 32 to 45");
+               }();
+            })($List.filter(function (_v12) {
+               return function () {
+                  switch (_v12.ctor)
+                  {case "_Tuple2":
                      return A2($Player.subIn,
-                       _v8._1,
+                       _v12._1,
                        m);}
                   _U.badCase($moduleName,
                   "on line 132, column 35 to 51");
                }();
-            })(model.players)));
+            })(model.players));
+         };
+         var subPairs = function (m) {
+            return A3($List.map2,
+            F2(function (v0,v1) {
+               return {ctor: "_Tuple2"
+                      ,_0: v0
+                      ,_1: v1};
+            }),
+            subsIn(m),
+            subsOut(m));
          };
          var subsForMinute = function (m) {
-            return $String.concat(_L.fromArray([$Basics.toString(m)
-                                               ,":00 - "
-                                               ,"Sub In "
-                                               ,subsIn(m)
-                                               ," -- Sub Out"
-                                               ,subsOut(m)]));
+            return function () {
+               var subs = subPairs(m);
+               var subMessage = $String.concat(_L.fromArray([$Basics.toString(m)
+                                                            ,":00 - "
+                                                            ,formatSubs(subs)]));
+               return $Basics.not($List.isEmpty(subs)) ? subMessage : "";
+            }();
          };
-         var substitutions = A2(reverseMap,
+         var substitutions = $List.filter(nonBlankString)(A2(reverseMap,
          subsForMinute,
-         model.minutes);
+         model.minutes));
          return A2($Html.ul,
          _L.fromArray([]),
          $List.map(function (n) {
@@ -12161,11 +12190,11 @@ Elm.PlayerList.make = function (_elm) {
             minute);
          };
          return $Array.length($Array.fromList($List.filter(isPlaying)(A2($List.map,
-         function (_v16) {
+         function (_v20) {
             return function () {
-               switch (_v16.ctor)
+               switch (_v20.ctor)
                {case "_Tuple2":
-                  return _v16._1;}
+                  return _v20._1;}
                _U.badCase($moduleName,
                "on line 97, column 26 to 27");
             }();
@@ -12196,11 +12225,11 @@ Elm.PlayerList.make = function (_elm) {
             case "Remove":
             return _U.replace([["players"
                                ,A2($List.filter,
-                               function (_v24) {
+                               function (_v28) {
                                   return function () {
-                                     switch (_v24.ctor)
+                                     switch (_v28.ctor)
                                      {case "_Tuple2":
-                                        return !_U.eq(_v24._0,
+                                        return !_U.eq(_v28._0,
                                           action._0);}
                                      _U.badCase($moduleName,
                                      "on line 59, column 53 to 67");
@@ -12209,18 +12238,18 @@ Elm.PlayerList.make = function (_elm) {
                                model.players)]],
               model);
             case "Sub": return function () {
-                 var subPlayer = function (_v28) {
+                 var subPlayer = function (_v32) {
                     return function () {
-                       switch (_v28.ctor)
+                       switch (_v32.ctor)
                        {case "_Tuple2":
-                          return _U.eq(_v28._0,
+                          return _U.eq(_v32._0,
                             action._0) ? {ctor: "_Tuple2"
-                                         ,_0: _v28._0
+                                         ,_0: _v32._0
                                          ,_1: A2($Player.update,
                                          action._1,
-                                         _v28._1)} : {ctor: "_Tuple2"
-                                                     ,_0: _v28._0
-                                                     ,_1: _v28._1};}
+                                         _v32._1)} : {ctor: "_Tuple2"
+                                                     ,_0: _v32._0
+                                                     ,_1: _v32._1};}
                        _U.badCase($moduleName,
                        "between lines 63 and 65");
                     }();
@@ -12243,16 +12272,16 @@ Elm.PlayerList.make = function (_elm) {
    var viewTable = F2(function (address,
    model) {
       return function () {
-         var playerRow = function (_v32) {
+         var playerRow = function (_v36) {
             return function () {
-               switch (_v32.ctor)
+               switch (_v36.ctor)
                {case "_Tuple2":
                   return A3($Player.rowView,
                     A2($Signal.forwardTo,
                     address,
-                    Sub(_v32._0)),
+                    Sub(_v36._0)),
                     $List.reverse(model.minutes),
-                    _v32._1);}
+                    _v36._1);}
                _U.badCase($moduleName,
                "on line 114, column 9 to 95");
             }();
@@ -12306,23 +12335,23 @@ Elm.PlayerList.make = function (_elm) {
              ,_0: a};
    };
    var viewPlayer = F2(function (address,
-   _v36) {
+   _v40) {
       return function () {
-         switch (_v36.ctor)
+         switch (_v40.ctor)
          {case "_Tuple2":
             return function () {
                  var context = A2($Player.Context,
                  A2($Signal.forwardTo,
                  address,
-                 Sub(_v36._0)),
+                 Sub(_v40._0)),
                  A2($Signal.forwardTo,
                  address,
-                 $Basics.always(Remove(_v36._0))));
+                 $Basics.always(Remove(_v40._0))));
                  return A2($Html.li,
                  _L.fromArray([]),
                  _L.fromArray([A2($Player.viewWithRemove,
                  context,
-                 _v36._1)]));
+                 _v40._1)]));
               }();}
          _U.badCase($moduleName,
          "between lines 83 and 88");

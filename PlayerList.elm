@@ -131,15 +131,25 @@ viewSublist address model =
         model.players
         |> List.filter (\(_,p) -> Player.subIn p m)
         |> List.map (\(_,p) -> Player.name p)
-        |> String.join ","
       subsOut m =
         model.players
         |> List.filter (\(_,p) -> Player.subOut p m)
         |> List.map (\(_,p) -> Player.name p)
-        |> String.join ","
+      subPairs m =
+        List.map2 (,) (subsIn m) (subsOut m)
+      formatSubs pairs =
+        pairs
+        |> List.map (\(i,o) -> i ++ " for " ++ o)
+        |> String.join ", "
+      nonBlankString s = not (String.isEmpty s)
       subsForMinute m =
-        String.concat [(toString m), ":00 - ", "Sub In ", (subsIn m), " -- Sub Out", (subsOut m) ]
-      substitutions = reverseMap subsForMinute model.minutes
+        let subs = subPairs m
+            subMessage = String.concat [(toString m), ":00 - ", (formatSubs subs)]
+        in
+          if not (List.isEmpty subs) then subMessage else ""
+      substitutions =
+        reverseMap subsForMinute model.minutes
+        |> List.filter nonBlankString
   in
     ul []
        (substitutions |> List.map (\n -> li [] [text n]))
