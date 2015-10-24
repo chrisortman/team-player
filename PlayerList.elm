@@ -6,6 +6,7 @@ import Html.Attributes exposing (style, attribute)
 import Html.Events exposing (onClick)
 import Array exposing (..)
 import String exposing (append, join)
+import Effects exposing (Effects, Never)
 -- MODEL
 
 type alias PlayerListModel =
@@ -20,9 +21,9 @@ type alias ID = Int
 minutesPerHalf = 20
 
 
-init : PlayerListModel
+init : (PlayerListModel, Effects Action)
 init =
-  { players = [
+  ({ players = [
       (1, Player.init "Damon"),
       (2, Player.init "Mason"),
       (3, Player.init "Clara"),
@@ -32,7 +33,7 @@ init =
     ]
   , nextID = 0
   , minutes = [1..minutesPerHalf]
-  }
+  }, Effects.none)
 
 -- UPDATE
 
@@ -41,7 +42,7 @@ type Action
   | Remove ID
   | Sub ID Player.Action
 
-update : Action -> PlayerListModel -> PlayerListModel
+update : Action -> PlayerListModel -> (PlayerListModel, Effects Action)
 update action model =
   case action of
     Add ->
@@ -49,22 +50,22 @@ update action model =
           newPlayer = ( model.nextID, Player.init genericName )
           newPlayers = model.players ++ [ newPlayer ]
       in
-          { model |
+          ({ model |
               players <- newPlayers,
               nextID <- model.nextID + 1
-            }
+            }, Effects.none)
 
     Remove id ->
-      { model |
+      ({ model |
           players <- List.filter (\(playerID, _) -> playerID /= id) model.players
-      }
+      }, Effects.none)
     Sub id playerAction ->
       let subPlayer (playerID, playerModel) =
           if playerID == id
              then (playerID, Player.update playerAction playerModel)
              else (playerID, playerModel)
       in
-         { model | players <- List.map subPlayer model.players }
+         ({ model | players <- List.map subPlayer model.players }, Effects.none)
 
 view : Signal.Address Action -> PlayerListModel -> Html
 view address model =
